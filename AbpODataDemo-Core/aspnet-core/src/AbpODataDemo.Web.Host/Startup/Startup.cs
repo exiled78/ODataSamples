@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNetCore.Builder;
@@ -144,7 +145,10 @@ namespace AbpODataDemo.Web.Host.Startup
 
             app.UseOData(builder =>
             {
-                builder.EntitySet<Person>("Persons").EntityType.Expand().Filter().OrderBy().Page();
+                builder.EntitySet<Person>("Persons").EntityType
+                    .Filter().Expand().Select().OrderBy().Page();
+                //.MaxTop(null);
+                //see https://github.com/OData/ODataSamples/tree/master/WebApi/v7.x/AspNetCoreODataBasicSample/BasicWebApiSample 
             });
 
             app.UseUnitOfWork(options =>
@@ -173,9 +177,11 @@ namespace AbpODataDemo.Web.Host.Startup
             // Enable middleware to serve swagger-ui assets (HTML, JS, CSS etc.)
             app.UseSwaggerUI(options =>
             {
-                options.InjectOnCompleteJavaScript("/swagger/ui/abp.js");
-                options.InjectOnCompleteJavaScript("/swagger/ui/on-complete.js");
+                //options.InjectOnCompleteJavaScript("/swagger/ui/abp.js");
+                //options.InjectOnCompleteJavaScript("/swagger/ui/on-complete.js");
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "AbpODataDemo API V1");
+                options.IndexStream = () => Assembly.GetExecutingAssembly()
+                    .GetManifestResourceStream("Gth.Web.Host.wwwroot.swagger.ui.index.html");
             }); // URL: /swagger
         }
 
